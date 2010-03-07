@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:orientation="vertical"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content" >
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/gps_state"
+    	/>
+    	<TextView
+	    	android:id="@+id/gps_state"
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/disabled"
+    	/>
+    	<TextView
+	    	android:id="@+id/nb_sat_text"
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    	/>
+    	<TextView
+	    	android:id="@+id/accuracy_text"
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    	/>
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/recording_state"
+    	/>
+    	<TextView
+	    	android:id="@+id/recording_state_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/stopped"
+    	/>
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/nbGpsLocations"
+    	/>
+    	<TextView
+	    	android:id="@+id/nbGpsLocations_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text=""
+    	/>
+    </LinearLayout>
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/nbCellLocations"
+    	/>
+    	<TextView
+	    	android:id="@+id/nbCellLocations_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text=""
+    	/>
+    </LinearLayout>
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/nbNeighborsLocations"
+    	/>
+    	<TextView
+	    	android:id="@+id/nbNeighborsLocations_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text=""
+    	/>
+    </LinearLayout>
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/nbWifiLocations"
+    	/>
+    	<TextView
+	    	android:id="@+id/nbWifiLocations_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text=""
+    	/>
+    </LinearLayout>
+	<Button android:text="@string/start"
+			android:id="@+id/start_stop_button"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
+	</Button>
+	<Button android:text="@string/refresh"
+			android:id="@+id/refresh_button"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
+	</Button>
+</LinearLayout>
+</ScrollView>

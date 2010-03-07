@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">Android Cells</string><string name="gps_state">&quot;État du GPS : &quot;</string>
+<string name="satellites">Satellites</string><string name="recording_state">&quot;État de l'enregistrement : &quot;</string><string name="start">Démarrer</string>
+<string name="stop">Arrêter</string>
+<string name="activated">Activé</string>
+<string name="stopped">Arrêté</string><string name="disabled">Désactivé</string>
+<string name="start_recording">Démarrage de l\'enregistrement...</string><string name="recording">En cours...</string>
+
+
+
+<string name="search_signals">Recherche des signaux...</string>
+
+
+
+<string name="refresh">Rafraichir</string>
+<string name="nbGpsLocations">&quot;Nb Gps Locations : &quot;</string><string name="nbCellLocations">&quot;Nb Cell Locations : &quot;</string><string name="nbNeighborsLocations">&quot;Nb Neighbors Locations : &quot;</string><string name="nbWifiLocations">&quot;Nb Wifi Locations : &quot;</string>
+<string name="preferences">Préférences</string>
+<string name="Cell_Parameter">Paramètres des Antennes Cellulaires</string><string name="Wifi_Parameter">Paramètres du Wifi</string>
+<string name="Cell_Filter">Filtre pour les Antennes Cellulaires</string>
+<string name="Wifi_Filter">Filtre pour le Wifi</string>
+<string name="Cell_Filter_Summary">Distance minimum de recherche des nouveaux signaux Cellulaires</string>
+<string name="Wifi_Filter_Summary">Distance minimum de recherche des nouveaux signaux Wifi</string>
+<string name="Wifi_Distance">Recherche des nouveaux signaux Wifi</string><string name="Cell_Distance">Recherche des nouveaux signaux Cellulaires</string>
+<string name="Distance_Summary">Choisissez la distance en mètres</string>
+<string name="meters_abbreviation">m</string>
+<string name="Activate_Cell">Enregistrement Cellulaire</string><string name="Activate_Cell_Activated">Enregistrement des Cellules Activé</string><string name="Activate_Cell_Disabled">Enregistrement des Cellules Désactivé</string><string name="Activate_Wifi">Enregistrement Wifi</string><string name="Activate_Wifi_Activated">Enregistrement des signaux Wifi Activé</string><string name="Activate_Wifi_Disabled">Enregistrement des signaux Wifi Désactivé</string>
+
+</resources>
