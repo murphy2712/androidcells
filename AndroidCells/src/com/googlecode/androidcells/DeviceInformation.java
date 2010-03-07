@@ -27,8 +27,6 @@ public class DeviceInformation implements Constants {
 
 	private static String TAG = "AndroidCells.DeviceInformation";
 	
-	private Context ctx;
-
 	private Service ls; // LogService
 
 	protected TelephonyManager mTelephonyManager;
@@ -55,7 +53,6 @@ public class DeviceInformation implements Constants {
 	private SharedPreferences pref;
 
 	public DeviceInformation(Service logService, Context ctx) {
-		this.ctx = ctx;
 		// initialize database
 		acDB = new AndroidCellsDB();
 		//acDB.getNbProviders();
