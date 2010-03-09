@@ -42,6 +42,28 @@ case INTERFACE_TRANSACTION:
 reply.writeString(DESCRIPTOR);
 return true;
 }
+case TRANSACTION_isRecording:
+{
+data.enforceInterface(DESCRIPTOR);
+boolean _result = this.isRecording();
+reply.writeNoException();
+reply.writeInt(((_result)?(1):(0)));
+return true;
+}
+case TRANSACTION_startRecording:
+{
+data.enforceInterface(DESCRIPTOR);
+this.startRecording();
+reply.writeNoException();
+return true;
+}
+case TRANSACTION_stopRecording:
+{
+data.enforceInterface(DESCRIPTOR);
+this.stopRecording();
+reply.writeNoException();
+return true;
+}
 case TRANSACTION_getProviderInfos:
 {
 data.enforceInterface(DESCRIPTOR);
@@ -99,6 +121,51 @@ return mRemote;
 public java.lang.String getInterfaceDescriptor()
 {
 return DESCRIPTOR;
+}
+public boolean isRecording() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+boolean _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_isRecording, _data, _reply, 0);
+_reply.readException();
+_result = (0!=_reply.readInt());
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+return _result;
+}
+public void startRecording() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_startRecording, _data, _reply, 0);
+_reply.readException();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+}
+public void stopRecording() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_stopRecording, _data, _reply, 0);
+_reply.readException();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
 }
 public java.lang.String getProviderInfos() throws android.os.RemoteException
 {
@@ -186,12 +253,18 @@ _data.recycle();
 return _result;
 }
 }
-static final int TRANSACTION_getProviderInfos = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
-static final int TRANSACTION_nbGpsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
-static final int TRANSACTION_nbCellLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
-static final int TRANSACTION_nbNeighborsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
-static final int TRANSACTION_nbWifiLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
+static final int TRANSACTION_isRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+static final int TRANSACTION_startRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
+static final int TRANSACTION_stopRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
+static final int TRANSACTION_getProviderInfos = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
+static final int TRANSACTION_nbGpsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
+static final int TRANSACTION_nbCellLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 5);
+static final int TRANSACTION_nbNeighborsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 6);
+static final int TRANSACTION_nbWifiLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 7);
 }
+public boolean isRecording() throws android.os.RemoteException;
+public void startRecording() throws android.os.RemoteException;
+public void stopRecording() throws android.os.RemoteException;
 public java.lang.String getProviderInfos() throws android.os.RemoteException;
 public int nbGpsLocations() throws android.os.RemoteException;
 public int nbCellLocations() throws android.os.RemoteException;

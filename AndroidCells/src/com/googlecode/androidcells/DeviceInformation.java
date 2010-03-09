@@ -104,6 +104,10 @@ public class DeviceInformation implements Constants {
 		return pref.getBoolean("wifi_checkbox", true);
 	}
 	
+	private int prefGPSDistanceAccuracy() {
+		return pref.getInt("GPSAccuracy", 20);
+	}
+	
 	private int prefCellDistanceFilter() {
 		return pref.getInt("CellFilter", 10);
 	}
@@ -117,10 +121,10 @@ public class DeviceInformation implements Constants {
 	}
 	
 	private int getGpsAccuracy(int distanceFilter) {
-		int gpsAccuracy = GPS_ACCURACY;
-		if (distanceFilter < GPS_ACCURACY/2) {
+		int gpsAccuracy = prefGPSDistanceAccuracy();
+		/*if (distanceFilter < GPS_ACCURACY/2) {
 			gpsAccuracy /= 2;
-		}
+		}*/
 		return gpsAccuracy;
 	}
 	
@@ -129,7 +133,7 @@ public class DeviceInformation implements Constants {
 		boolean updateGPS = false;
 		// Checks if the GPS info is accurate (< GPS_ACCURACY or GPS_ACCURACY/2 meters)
 		if (currentLoc.getAccuracy() < getGpsAccuracy(prefCellDistanceFilter())) {
-			Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+			//Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
 			// Checks if there is not a nearby cell position in DB
 			if (isRecordingCell()
 				&& !acDB.cellLocationNearBD(currentLoc, prefCellDistanceFilter(),
@@ -142,7 +146,9 @@ public class DeviceInformation implements Constants {
 					updateNeighborsDB(currentLoc);
 				}
 			}
-		} else Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+		} else {
+			Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+		}
 		if (currentLoc.getAccuracy() < getGpsAccuracy(prefWifiDistanceFilter())) {
 			//Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefWifiDistanceFilter())+"m : "+currentLoc.getAccuracy());
 			if (isRecordingWifi() && wm.isWifiEnabled()) {
@@ -153,7 +159,9 @@ public class DeviceInformation implements Constants {
 					}
 				}
 			}
-		} else Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefWifiDistanceFilter())+"m : "+currentLoc.getAccuracy());
+		} else {
+			Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefWifiDistanceFilter())+"m : "+currentLoc.getAccuracy());
+		}
 		if (updateGPS) {
 			updateGpsDB(currentLoc);
 		}
@@ -265,7 +273,7 @@ public class DeviceInformation implements Constants {
 					w.level= scanlist.get(idx).level;
 					acDB.insertWifi(w);
 					idx++;
-					Log.v(TAG, "Wifi: "+w.BSSID+"/"+w.SSID+"/"+w.capabilities+"/"+w.frequency+"/"+w.level);
+					//Log.v(TAG, "Wifi: "+w.BSSID+"/"+w.SSID+"/"+w.capabilities+"/"+w.frequency+"/"+w.level);
 				} 
 				scanlist.iterator();
 			} else {

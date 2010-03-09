@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="@string/GPS_Parameter">
+		<com.hlidskialf.android.preference.SeekBarPreference android:title="@string/GPS_Accuracy"
+			android:key="GPSAccuracy"
+			android:summary="@string/GPS_Accuracy_Summary"
+			android:dependency="cell_checkbox"
+			android:persistent="true"
+			android:dialogMessage="@string/Distance_Summary"
+			android:text="@string/meters_abbreviation"
+			android:max="100"
+			android:defaultValue="20"
+			android:dialogTitle="@string/GPS_Title_Box" />
+	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/Cell_Parameter">
 		<CheckBoxPreference android:title="@string/Activate_Cell" android:key="cell_checkbox"
 			android:summaryOn="@string/Activate_Cell_Activated"
@@ -15,7 +27,7 @@
 			android:text="@string/meters_abbreviation"
 			android:max="100"
 			android:defaultValue="10"
-			android:dialogTitle="@string/Cell_Distance" />
+			android:dialogTitle="@string/Cell_Title_Box" />
 	</PreferenceCategory>
 	<PreferenceCategory android:title="@string/Wifi_Parameter">
 		<CheckBoxPreference android:title="@string/Activate_Wifi" android:key="wifi_checkbox"
@@ -32,6 +44,6 @@
 			android:text="@string/meters_abbreviation"
 			android:max="100"
 			android:defaultValue="5"
-			android:dialogTitle="@string/Wifi_Distance" />
+			android:dialogTitle="@string/Wifi_Title_Box" />
 	</PreferenceCategory>
 </PreferenceScreen>

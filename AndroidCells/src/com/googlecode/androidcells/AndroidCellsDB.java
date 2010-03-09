@@ -192,7 +192,7 @@ public class AndroidCellsDB implements Constants {
 				" AND cells.type="+networkType;
 		//String selection = "lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax;
 		//Log.v(TAG, selection);
-		Log.v(TAG, sql);
+		//Log.v(TAG, sql);
 		/*Cursor cur = db.query(GPS_TABLE,
 				new String [] {"lat", "lon"},
 				selection,
@@ -208,19 +208,19 @@ public class AndroidCellsDB implements Constants {
 	            bdLoc.setLongitude(cur.getFloat(lonName));
 	            float dist = currentLoc.distanceTo(bdLoc);
 	            if (dist < distance_filter) {
-	            	/*Log.v(TAG, "Location gps (lat, lon) near DB: "
+	            	Log.v(TAG, "Location gps (lat, lon) near DB: "
 	            			+dist+"m, dist="+distance_filter+"m," +
-	            					"deci0="+decimal_filter[0]+", deci1="+decimal_filter[1]);*/
+	            					"deci0="+decimal_filter[0]+", deci1="+decimal_filter[1]);
 	            	cur.close();
 	            	return true; // GPS location near DB
 	            } else {
-	            	Log.v(TAG, "Location in DB is far:"+dist+"m");
+	            	//Log.v(TAG, "Location in DB is far:"+dist+"m");
 	            }
 	        } while (cur.moveToNext());
 			cur.close();
 		} else { // GPS location not near DB (filtered by SQL)
-			Log.v(TAG, "Nothing similar in DB (filtered by SQL query," +
-					"deci0="+decimal_filter[0]+", deci1="+decimal_filter[1]+")");
+			//Log.v(TAG, "Nothing similar in DB (filtered by SQL query," +
+			//		"deci0="+decimal_filter[0]+", deci1="+decimal_filter[1]+")");
 			cur.close();
 		}
 		//return gpsLocationNearDB;
@@ -239,7 +239,7 @@ public class AndroidCellsDB implements Constants {
 				" FROM gps" +
 				" JOIN wifi ON gps.gpsdate=wifi.gpsdate" +
 				" WHERE lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax;
-		Log.v(TAG, sql);
+		//Log.v(TAG, sql);
 		Cursor cur = db.rawQuery(sql, null);
 		if ((cur != null) && (cur.moveToFirst())) {
 			Location bdLoc = new Location("");
@@ -255,12 +255,12 @@ public class AndroidCellsDB implements Constants {
 	            	cur.close();
 	            	return true; // GPS location near DB
 	            } else {
-	            	Log.v(TAG, "Location in DB is far:"+dist+"m");
+	            	//Log.v(TAG, "Location in DB is far:"+dist+"m");
 	            }
 	        } while (cur.moveToNext());
 			cur.close();
 		} else { // GPS location not near DB (filtered by SQL)
-			Log.v(TAG, "Nothing similar in DB (filtered by SQL query, decimal_filter="+decimal_filter+")");
+			//Log.v(TAG, "Nothing similar in DB (filtered by SQL query, decimal_filter="+decimal_filter+")");
 			cur.close();
 		}
 		return gpsLocationNearDB;

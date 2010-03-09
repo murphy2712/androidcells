@@ -23,7 +23,7 @@ import android.util.Log;
 public class LogService extends Service {
 
 	private static final String TAG = "AndroidCells.LogService";
-	private static boolean recording = false;
+	private boolean recording = false;
 	private static final int RECORDING_NOTIFICATION_ID = R.layout.main;
 	private static NotificationManager mNotificationManager;
 	private static Notification n;
@@ -31,7 +31,6 @@ public class LogService extends Service {
 	private gpsLocationListener mGpsLocationListener;
 	private DeviceInformation di;
 	
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
@@ -39,7 +38,26 @@ public class LogService extends Service {
 	}
 	
 	private final LogServiceInterface.Stub mBinder = new LogServiceInterface.Stub() {
-       @Override
+		@Override
+		public boolean isRecording() throws RemoteException {
+			return recording;
+		}
+		
+		@Override
+		public void startRecording() throws RemoteException {
+			recording = true;
+			mNotificationManager.notify(RECORDING_NOTIFICATION_ID, n);
+		}
+
+		@Override
+		public void stopRecording() throws RemoteException {
+			recording = false;
+			// stops the notification icon
+			if (mNotificationManager != null)
+				mNotificationManager.cancel(RECORDING_NOTIFICATION_ID);
+		}
+		
+		@Override
 		public String getProviderInfos() throws RemoteException {
 			return di.getProviderInfos();
 		}
@@ -65,7 +83,7 @@ public class LogService extends Service {
 		}
 	};
 	
-	public static boolean isRecording() {
+	public boolean isRecording() {
 		return recording;
 	}
 	
@@ -92,31 +110,32 @@ public class LogService extends Service {
 		di = new DeviceInformation(LogService.this, getBaseContext());
 		// Preparing Notification
 		n = new Notification(R.drawable.icon,
-				getString(R.string.search_signals), System.currentTimeMillis());
+				getString(R.string.recording_signals), System.currentTimeMillis());
 		Intent notificationIntent = new Intent(this, Android_Cells.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		n.setLatestEventInfo(this,
-						getString(R.string.app_name), getString(R.string.search_signals),
+						getString(R.string.app_name), getString(R.string.recording_signals),
 						contentIntent);
 		n.flags = n.flags | Notification.FLAG_ONGOING_EVENT;	// | Notification.FLAG_NO_CLEAR;
-		
-	}
-	
-	public static void startRecording() {
-		recording = true;
-		mNotificationManager.notify(RECORDING_NOTIFICATION_ID, n);		
-	}
-	
-	public static void stopRecording() {
-		recording = false;
-		// stops the notification icon
-		if (mNotificationManager != null)
-			mNotificationManager.cancel(RECORDING_NOTIFICATION_ID);
 	}
 	
 	private class gpsLocationListener implements LocationListener {
 		public void onLocationChanged(final Location loc) {
-			LogService.this.onLocationChanged(loc);
+			/*LogServiceInterfaceResponse lsir;
+			try {
+				lsir.onLocationChanged(currentLocation.getTime());
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}*/
+			if (recording) {
+				try {
+					di.updateDB(loc);
+					//Log.v(TAG, di.getStringInfos(currentLocation));
+				} catch (Exception e) {
+					Log.e(TAG, "onLocationChanged Exception: " + e.toString());
+				}
+			}
 		}
 
 		@Override
@@ -132,24 +151,6 @@ public class LogService extends Service {
 		@Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {
 			// TODO Auto-generated method stub
-		}
-	}
-	
-	private void onLocationChanged(Location currentLocation) {
-		/*LogServiceInterfaceResponse lsir;
-		try {
-			lsir.onLocationChanged(currentLocation.getTime());
-		} catch (RemoteException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
-		if (recording) {
-			try {
-				di.updateDB(currentLocation);
-				//Log.v(TAG, di.getStringInfos(currentLocation));
-			} catch (Exception e) {
-				Log.e(TAG, "onLocationChanged Exception: " + e.toString());
-			}
 		}
 	}
 
