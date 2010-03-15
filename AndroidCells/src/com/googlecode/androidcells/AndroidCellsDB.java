@@ -187,9 +187,10 @@ public class AndroidCellsDB implements Constants {
 		String sql = "SELECT lat,lon" +
 				" FROM gps" +
 				" JOIN cells ON gps.gpsdate=cells.gpsdate" +
-				" WHERE lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax +
+				" WHERE gps.lat>"+latMin+" AND gps.lat<"+latMax+" AND gps.lon>"+lonMin+" AND gps.lon<"+lonMax +
 				" AND cells.operator="+operator +
-				" AND cells.type="+networkType;
+				" AND cells.type="+networkType +
+				" AND gps.accuracy<"+currentLoc.getAccuracy();
 		//String selection = "lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax;
 		//Log.v(TAG, selection);
 		//Log.v(TAG, sql);
@@ -223,8 +224,7 @@ public class AndroidCellsDB implements Constants {
 			//		"deci0="+decimal_filter[0]+", deci1="+decimal_filter[1]+")");
 			cur.close();
 		}
-		//return gpsLocationNearDB;
-		return true;
+		return gpsLocationNearDB;
 	}
 	
 	protected boolean wifiLocationNearBD(Location currentLoc, int distance_filter) {
