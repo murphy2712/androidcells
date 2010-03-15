@@ -1,6 +1,8 @@
 package com.googlecode.androidcells;
 
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.googlecode.androidcells.R;
 
@@ -14,6 +16,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,7 +29,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class Android_Cells extends Activity implements android.view.View.OnClickListener	 {
+public class Android_Cells extends Activity implements android.view.View.OnClickListener {
 	private static String TAG = "AndroidCells";
 
 	private LocationManager mLocationManager;
@@ -49,6 +52,13 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			lsInterface = LogServiceInterface.Stub.asInterface((IBinder)service);
+			try {
+				// initialize screen infos following service state
+				setUIRecordingState(lsInterface.isRecording());
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			updateInfosUI(); // initialize DB infos on screen
 		}
 
@@ -78,7 +88,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		refresh_button = (Button) findViewById(R.id.refresh_button);
 		refresh_button.setOnClickListener(this);
 		svc = new Intent(this, LogService.class);
-		
+
 		// Activate GPS for UI
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// Checks if GPS is enabled
@@ -139,7 +149,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 			/*mLocationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 0, 0,
 					mGpsLocationListener);*/
-			
+
 			// start & initialize the service
 			startService();
 		} else { // GPS disabled
@@ -151,14 +161,6 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 	private void startService() {
 		startService(svc);
 		bindService(svc, mConnection, BIND_AUTO_CREATE);
-		
-		// initialize screen infos following service state
-		try {
-			setUIRecordingState(lsInterface.isRecording());
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	@Override
@@ -197,14 +199,6 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		}
 	}
 	
-	private void resetUI() {
-		// stop service
-		stopService(svc);
-		// update buttons
-		recording_state_text.setText(R.string.disabled);
-		startstop_button.setText(R.string.start);
-	}
-	
 	private void updateGpsSat(int fixSat, int nbSat){
 		String sat_info = " ("+fixSat+"/"+nbSat+" "+getText(R.string.satellites)+")";
 		nb_sat_text.setTextKeepState(sat_info);
@@ -213,16 +207,32 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		}
 	}
 	
-	private void updateInfosUI() {
-		try {
-			long time=SystemClock.uptimeMillis();
-			nbGpsLocations_text.setText(""+lsInterface.nbGpsLocations());
-			nbCellLocations_text.setText(""+lsInterface.nbCellLocations());
-			nbNeighborsLocations_text.setText(""+lsInterface.nbNeighborsLocations());
-			nbWifiLocations_text.setText(""+lsInterface.nbWifiLocations());
-			Log.v(TAG,"UPDATE="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-		} catch (Exception e) {
-			//e.printStackTrace();
+	private synchronized void updateInfosUI() {
+		//long time=SystemClock.uptimeMillis();
+		new updateInfosUITask().execute();
+		//Log.v(TAG,"UPDATE_1="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
+	}
+	
+	private class updateInfosUITask extends AsyncTask<Integer, Integer, String[]> {
+		//long time=SystemClock.uptimeMillis();
+		@Override
+		protected String[] doInBackground(Integer... params) {
+			String[] valeurs = {"","","",""};
+			try {
+				valeurs[0] = ""+lsInterface.nbGpsLocations();
+				valeurs[1] = ""+lsInterface.nbCellLocations();
+				valeurs[2] = ""+lsInterface.nbNeighborsLocations();
+				valeurs[3] = ""+lsInterface.nbWifiLocations();
+			} catch (Exception e) {}
+			return valeurs;
+		}
+		@Override
+		protected void onPostExecute(String[] result) {
+			nbGpsLocations_text.setText(result[0]);
+			nbCellLocations_text.setText(result[1]);
+			nbNeighborsLocations_text.setText(result[2]);
+			nbWifiLocations_text.setText(result[3]);
+			//Log.v(TAG,"UPDATE_2="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 		}
 	}
 	
@@ -271,8 +281,8 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 	@Override
 	protected void onPause() {
 		Log.i(TAG, "OnPause()");
-		super.onPause();
 		disableGpsListeners();
+		super.onPause();
 	}
 
 	@Override
@@ -290,13 +300,23 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		try {
 			if (!lsInterface.isRecording()) {
 				Log.v(TAG, "Not recording, Stopping service...");
+				// stop service
 				stopService(svc);
-				resetUI();
+				// update buttons
+				recording_state_text.setText(R.string.disabled);
+				startstop_button.setText(R.string.start);
 			}
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			//e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void onRestart() {
+		Log.i(TAG, "OnRestart()");
+		super.onRestart();
+		svc = new Intent(this, LogService.class);
+		startService();
 	}
 	
 	@Override
