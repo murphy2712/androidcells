@@ -190,7 +190,7 @@ public class AndroidCellsDB implements Constants {
 				" WHERE gps.lat>"+latMin+" AND gps.lat<"+latMax+" AND gps.lon>"+lonMin+" AND gps.lon<"+lonMax +
 				" AND cells.operator="+operator +
 				" AND cells.type="+networkType +
-				" AND gps.accuracy<"+currentLoc.getAccuracy();
+				" AND gps.accuracy<="+currentLoc.getAccuracy();
 		//String selection = "lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax;
 		//Log.v(TAG, selection);
 		//Log.v(TAG, sql);
@@ -238,7 +238,9 @@ public class AndroidCellsDB implements Constants {
 		String sql = "SELECT lat,lon" +
 				" FROM gps" +
 				" JOIN wifi ON gps.gpsdate=wifi.gpsdate" +
-				" WHERE lat>"+latMin+" AND lat<"+latMax+" AND lon>"+lonMin+" AND lon<"+lonMax;
+				" WHERE gps.lat>"+latMin+" AND gps.lat<"+latMax +
+				" AND gps.lon>"+lonMin+" AND gps.lon<"+lonMax +
+				" AND gps.accuracy<="+currentLoc.getAccuracy();
 		//Log.v(TAG, sql);
 		Cursor cur = db.rawQuery(sql, null);
 		if ((cur != null) && (cur.moveToFirst())) {
