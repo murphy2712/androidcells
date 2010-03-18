@@ -54,6 +54,8 @@ public class AndroidCellsDB implements Constants {
 	
 	private SQLiteDatabase db;
 	
+	private int nbGpsLocations=0, nbCellLocations=0, nbNeighborsLocations=0, nbWifiLocations=0;
+	
 	protected AndroidCellsDB() {
 		//db = ctx.openOrCreateDatabase(DATABASE_NAME, Context.MODE_WORLD_WRITEABLE, null);
 		db = SQLiteDatabase.openOrCreateDatabase(DATABASE_NAME, null);
@@ -61,10 +63,40 @@ public class AndroidCellsDB implements Constants {
 		db.execSQL(CREATE_TABLE_NEIGHBORS);
 		db.execSQL(CREATE_TABLE_GPS);
 		db.execSQL(CREATE_TABLE_WIFI);
+		nbGpsLocations = nbTableLocations(GPS_TABLE);
+		nbCellLocations = nbTableLocations(CELLS_TABLE);
+		nbNeighborsLocations = nbTableLocations(NEIGHBORS_TABLE);
+		nbWifiLocations = nbTableLocations(WIFI_TABLE);
 	}
 	
 	protected void closeDB() {
 		db.close();
+	}
+
+	private int nbTableLocations(String table) {
+		int nbTableLocations = 0;
+		Cursor cur = db.query(table, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
+		if ((cur != null) && (cur.moveToFirst())) {
+			nbTableLocations = cur.getInt( cur.getColumnIndex("nb") );
+		}
+		cur.close();
+		return nbTableLocations;
+	}
+	
+	protected int nbGpsLocations() {
+		return nbGpsLocations;
+	}
+	
+	protected int nbCellLocations() {
+		return nbCellLocations;
+	}
+	
+	protected int nbNeighborsLocations() {
+		return nbNeighborsLocations;
+	}
+	
+	protected int nbWifiLocations() {
+		return nbWifiLocations;
 	}
 	
 	protected boolean insertCell(Cell c) {
@@ -77,7 +109,9 @@ public class AndroidCellsDB implements Constants {
 		values.put("lac", c.lac);
 		values.put("psc", c.psc);
 		values.put("strenght_asu", c.strenght_asu);
-		return (db.insert(CELLS_TABLE, null, values) > 0);
+		boolean return_value = db.insert(CELLS_TABLE, null, values) > 0;
+		if (return_value) nbCellLocations++;
+		return return_value;
 	}
 	
 	protected boolean insertNeighbor(Neighbor n) {
@@ -88,7 +122,9 @@ public class AndroidCellsDB implements Constants {
 		values.put("lac", n.lac);
 		values.put("psc", n.psc);
 		values.put("strenght_asu", n.strenght_asu);
-		return (db.insert(NEIGHBORS_TABLE, null, values) > 0);
+		boolean return_value = db.insert(NEIGHBORS_TABLE, null, values) > 0; 
+		if (return_value) nbNeighborsLocations++;
+		return return_value;
 	}
 	
 	protected boolean insertGps(Gps g) {
@@ -100,7 +136,9 @@ public class AndroidCellsDB implements Constants {
 		values.put("speed", round(g.speed, SPEED_ACCURACY));
 		values.put("accuracy", g.accuracy);
 		values.put("bearing", round(g.bearing, BEARING_ACCURACY));
-		return (db.insert(GPS_TABLE, null, values) > 0);
+		boolean return_value = db.insert(GPS_TABLE, null, values) > 0; 
+		if (return_value) nbGpsLocations++;
+		return return_value;		
 	}
 	
 	protected boolean insertWifi(Wifi w) {
@@ -111,7 +149,9 @@ public class AndroidCellsDB implements Constants {
 		values.put("capabilities", w.capabilities);
 		values.put("frequency", w.frequency);
 		values.put("level", w.level);
-		return (db.insert(WIFI_TABLE, null, values) > 0);
+		boolean return_value = db.insert(WIFI_TABLE, null, values) > 0;
+		if (return_value) nbWifiLocations++;
+		return return_value;
 	}
 	
 	private float round(double nb, int x) {
@@ -267,51 +307,6 @@ public class AndroidCellsDB implements Constants {
 		}
 		return gpsLocationNearDB;
 	}
-	
-	protected int nbGpsLocations() {
-		int nbGpsLocations = 0;
-		Cursor cur = db.query(GPS_TABLE, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
-		if ((cur != null) && (cur.moveToFirst())) {
-			nbGpsLocations = cur.getInt( cur.getColumnIndex("nb") );
-		}
-		cur.close();
-		return nbGpsLocations;
-	}
-	
-	protected int nbCellLocations() {
-		int nbCellLocations = 0;
-		Cursor cur = db.query(CELLS_TABLE, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
-		if ((cur != null) && (cur.moveToFirst())) {
-			nbCellLocations = cur.getInt( cur.getColumnIndex("nb") );
-		}
-		cur.close();
-		return nbCellLocations;
-	}
-	
-	protected int nbNeighborsLocations() {
-		int nbNeiborsLocations = 0;
-		Cursor cur = db.query(NEIGHBORS_TABLE, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
-		if ((cur != null) && (cur.moveToFirst())) {
-			nbNeiborsLocations = cur.getInt( cur.getColumnIndex("nb") );
-		}
-		cur.close();
-		return nbNeiborsLocations;
-	}
-	
-	protected int nbWifiLocations() {
-		int nbWifiLocations = 0;
-		//long time=SystemClock.uptimeMillis();
-		//Log.v(TAG,"DÉBUT="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-		Cursor cur = db.query(WIFI_TABLE, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
-		//Log.v(TAG,"MILIEU="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-		if ((cur != null) && (cur.moveToFirst())) {
-			nbWifiLocations = cur.getInt( cur.getColumnIndex("nb") );
-		}
-		//Log.v(TAG,"FIN="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-		cur.close();
-		return nbWifiLocations;
-	}
-	
 	
 	protected void getNbProviders() {
 		String sql = "select count(*) as nb, operator_name from cells group by operator_name";
