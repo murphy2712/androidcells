@@ -51,12 +51,12 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			lsInterface = LogServiceInterface.Stub.asInterface((IBinder)service);
+			lsInterface = LogServiceInterface.Stub.asInterface(service);
 			try {
+				lsInterface.setCallback(callback); // initialize callback
 				// initialize screen infos following service state
 				setUIRecordingState(lsInterface.isRecording());
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			updateInfosUI(); // initialize DB infos on screen
@@ -65,6 +65,17 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			 lsInterface = null;		
+		}
+	};
+	
+	private final LogServiceInterfaceResponse.Stub callback = new LogServiceInterfaceResponse.Stub() {
+		@Override
+		public void nbGpsLocation(final int nb) throws RemoteException {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					nbGpsLocations_text.setText(String.valueOf(nb));
+				}
+			});
 		}
 	};
 	
@@ -121,7 +132,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 			mGpsLocationListener = new LocationListener() {
 				@Override
 				public void onLocationChanged(Location location) {
-					updateInfosUI(); // update screen UI info
+					//updateInfosUI(); // update screen UI info
 					accuracy_text.setText(", +/- "+location.getAccuracy()+"m");
 				}
 
@@ -176,7 +187,6 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 					setUIRecordingState(true);
 				}
 			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
 			break;

@@ -75,11 +75,13 @@ public class AndroidCellsDB implements Constants {
 
 	private int nbTableLocations(String table) {
 		int nbTableLocations = 0;
+		long time=SystemClock.uptimeMillis();
 		Cursor cur = db.query(table, new String [] {"count(gpsdate) as nb"}, null, null, null, null, null);
 		if ((cur != null) && (cur.moveToFirst())) {
 			nbTableLocations = cur.getInt( cur.getColumnIndex("nb") );
 		}
 		cur.close();
+		Log.v(TAG,"Nb Table "+table+"="+ (float)(SystemClock.uptimeMillis()-time)/1000);
 		return nbTableLocations;
 	}
 	
@@ -122,6 +124,19 @@ public class AndroidCellsDB implements Constants {
 		values.put("lac", n.lac);
 		values.put("psc", n.psc);
 		values.put("strenght_asu", n.strenght_asu);
+		boolean return_value = db.insert(NEIGHBORS_TABLE, null, values) > 0; 
+		if (return_value) nbNeighborsLocations++;
+		return return_value;
+	}
+	
+	protected boolean insertNeighbor(String gpsdate, int type, int cid, int lac, int psc, int strenght_asu) {
+		ContentValues values = new ContentValues();
+		values.put("gpsdate", gpsdate);
+		values.put("type", type);
+		values.put("cid", cid);
+		values.put("lac", lac);
+		values.put("psc", psc);
+		values.put("strenght_asu", strenght_asu);
 		boolean return_value = db.insert(NEIGHBORS_TABLE, null, values) > 0; 
 		if (return_value) nbNeighborsLocations++;
 		return return_value;
@@ -309,7 +324,7 @@ public class AndroidCellsDB implements Constants {
 	}
 	
 	protected void getNbProviders() {
-		String sql = "select count(*) as nb, operator_name from cells group by operator_name";
+		String sql = "select count(gpsdate) as nb, operator_name from cells group by operator_name";
 		long time=SystemClock.uptimeMillis();
 		Log.v(TAG,"DÉBUT="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 		Cursor cur = db.rawQuery(sql, null);

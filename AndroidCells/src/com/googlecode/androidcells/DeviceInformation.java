@@ -12,6 +12,7 @@ import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
@@ -142,8 +143,11 @@ public class DeviceInformation implements Constants {
 				if (isValidCell(mLocation)) {
 					Log.v(TAG, "Recording Cell in DB...");
 					updateGPS = true;
+					long time=SystemClock.uptimeMillis();
 					updateCellDB(currentLoc, mLocation);
+					Log.v(TAG,"FIN Update Cells="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 					updateNeighborsDB(currentLoc);
+					Log.v(TAG,"FIN Update Neighbors="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 				}
 			}
 		} else {
@@ -154,8 +158,10 @@ public class DeviceInformation implements Constants {
 			if (isRecordingWifi() && wm.isWifiEnabled()) {
 				// Checks if there is not a nearby Wifi position in DB
 				if (!acDB.wifiLocationNearBD(currentLoc, prefWifiDistanceFilter())) {
+					//long time=SystemClock.uptimeMillis();
 					if (updateWifiDB(wm, currentLoc)) {
 						updateGPS = true;
+						//Log.v(TAG,"FIN Update Wifi="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 					}
 				}
 			}
@@ -219,6 +225,7 @@ public class DeviceInformation implements Constants {
 
 	// add cell signal
 	private void updateCellDB(Location currentLoc, GsmCellLocation mLocation) {
+		//long time=SystemClock.uptimeMillis();
 		Cell cell = new Cell();
 		cell.gpsdate = gpsTime2String(currentLoc.getTime());
 		cell.operator_name = mTelephonyManager.getNetworkOperatorName();
@@ -228,7 +235,9 @@ public class DeviceInformation implements Constants {
 		cell.lac = mLocation.getLac();
 		//cell.psc = mLocation.Cid();
 		cell.strenght_asu = signalStrengthAsu;
+		//Log.v(TAG,"FIN Update Cells DB1="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 		acDB.insertCell(cell);
+		//Log.v(TAG,"FIN Update Cells DB2="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 	}
 
 	// add neighbors signals
@@ -242,14 +251,12 @@ public class DeviceInformation implements Constants {
 				// checks if cell info is valid
 				if ((signalStrengthAsu != NeighboringCellInfo.UNKNOWN_RSSI)
 						&& mNeighboringCellInfo.get(i).getLac() != 0) {
-					Neighbor n = new Neighbor();
-					n.gpsdate = gpsTime2String(currentLoc.getTime());
-					n.type = mNeighboringCellInfo.get(i).getNetworkType();
-					n.cid = mNeighboringCellInfo.get(i).getCid();
-					n.lac = mNeighboringCellInfo.get(i).getLac();
-					n.psc = mNeighboringCellInfo.get(i).getPsc();
-					n.strenght_asu = mNeighboringCellInfo.get(i).getRssi();
-					acDB.insertNeighbor(n);	
+					acDB.insertNeighbor(gpsTime2String(currentLoc.getTime()),
+										mNeighboringCellInfo.get(i).getNetworkType(),
+										mNeighboringCellInfo.get(i).getCid(),
+										mNeighboringCellInfo.get(i).getLac(),
+										mNeighboringCellInfo.get(i).getPsc(),
+										mNeighboringCellInfo.get(i).getRssi());
 				}
 			}
 		}

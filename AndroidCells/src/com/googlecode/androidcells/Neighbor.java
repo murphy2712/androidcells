@@ -1,7 +1,5 @@
 package com.googlecode.androidcells;
 
-import java.util.Date;
-
 public class Neighbor {
 	String gpsdate;
 	int type;

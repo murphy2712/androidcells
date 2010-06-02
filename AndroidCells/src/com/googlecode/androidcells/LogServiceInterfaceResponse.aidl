@@ -1,5 +1,5 @@
 package com.googlecode.androidcells;
 
 interface LogServiceInterfaceResponse {
-	void onLocationChanged(long time);
+	void nbGpsLocation(int nb);
 }

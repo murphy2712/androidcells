@@ -1,7 +1,5 @@
 package com.googlecode.androidcells;
 
-import java.util.Date;
-
 public class Cell {
 	String gpsdate;
 	String operator_name;

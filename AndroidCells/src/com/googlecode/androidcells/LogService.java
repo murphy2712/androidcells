@@ -6,14 +6,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -23,6 +20,7 @@ import android.util.Log;
 public class LogService extends Service {
 
 	private static final String TAG = "AndroidCells.LogService";
+	private LogServiceInterfaceResponse callback;
 	private boolean recording = false;
 	private static final int RECORDING_NOTIFICATION_ID = R.layout.main;
 	private static NotificationManager mNotificationManager;
@@ -33,11 +31,16 @@ public class LogService extends Service {
 	
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
 		return mBinder;
 	}
 	
 	private final LogServiceInterface.Stub mBinder = new LogServiceInterface.Stub() {
+		@Override
+		public void setCallback(LogServiceInterfaceResponse callback_)
+				throws RemoteException {
+			callback = callback_;
+		}
+		
 		@Override
 		public boolean isRecording() throws RemoteException {
 			return recording;
@@ -120,17 +123,12 @@ public class LogService extends Service {
 	}
 	
 	private class gpsLocationListener implements LocationListener {
+		@Override
 		public void onLocationChanged(final Location loc) {
-			/*LogServiceInterfaceResponse lsir;
-			try {
-				lsir.onLocationChanged(currentLocation.getTime());
-			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}*/
 			if (recording) {
 				try {
 					di.updateDB(loc);
+					callback.nbGpsLocation(di.nbGpsLocations());
 					//Log.v(TAG, di.getStringInfos(currentLocation));
 				} catch (Exception e) {
 					Log.e(TAG, "onLocationChanged Exception: " + e.toString());
@@ -153,7 +151,7 @@ public class LogService extends Service {
 			// TODO Auto-generated method stub
 		}
 	}
-
+	
 	@Override
 	public void onDestroy() {
 		Log.v(TAG, "onDestroy()");
