@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/murphy/data/android/workspace/AndroidCells/src/com/googlecode/androidcells/LogServiceInterfaceResponse.aidl
+ * Original file: /home/murphy/Dropbox/workspaceAndroid/AndroidCells/src/com/googlecode/androidcells/LogServiceInterfaceResponse.aidl
  */
 package com.googlecode.androidcells;
 public interface LogServiceInterfaceResponse extends android.os.IInterface
@@ -42,12 +42,12 @@ case INTERFACE_TRANSACTION:
 reply.writeString(DESCRIPTOR);
 return true;
 }
-case TRANSACTION_onLocationChanged:
+case TRANSACTION_nbGpsLocation:
 {
 data.enforceInterface(DESCRIPTOR);
-long _arg0;
-_arg0 = data.readLong();
-this.onLocationChanged(_arg0);
+int _arg0;
+_arg0 = data.readInt();
+this.nbGpsLocation(_arg0);
 reply.writeNoException();
 return true;
 }
@@ -69,14 +69,14 @@ public java.lang.String getInterfaceDescriptor()
 {
 return DESCRIPTOR;
 }
-public void onLocationChanged(long time) throws android.os.RemoteException
+public void nbGpsLocation(int nb) throws android.os.RemoteException
 {
 android.os.Parcel _data = android.os.Parcel.obtain();
 android.os.Parcel _reply = android.os.Parcel.obtain();
 try {
 _data.writeInterfaceToken(DESCRIPTOR);
-_data.writeLong(time);
-mRemote.transact(Stub.TRANSACTION_onLocationChanged, _data, _reply, 0);
+_data.writeInt(nb);
+mRemote.transact(Stub.TRANSACTION_nbGpsLocation, _data, _reply, 0);
 _reply.readException();
 }
 finally {
@@ -85,7 +85,7 @@ _data.recycle();
 }
 }
 }
-static final int TRANSACTION_onLocationChanged = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+static final int TRANSACTION_nbGpsLocation = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
 }
-public void onLocationChanged(long time) throws android.os.RemoteException;
+public void nbGpsLocation(int nb) throws android.os.RemoteException;
 }

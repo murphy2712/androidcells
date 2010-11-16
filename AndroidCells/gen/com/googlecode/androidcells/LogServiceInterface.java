@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/murphy/data/android/workspace/AndroidCells/src/com/googlecode/androidcells/LogServiceInterface.aidl
+ * Original file: /home/murphy/Dropbox/workspaceAndroid/AndroidCells/src/com/googlecode/androidcells/LogServiceInterface.aidl
  */
 package com.googlecode.androidcells;
 public interface LogServiceInterface extends android.os.IInterface
@@ -40,6 +40,15 @@ switch (code)
 case INTERFACE_TRANSACTION:
 {
 reply.writeString(DESCRIPTOR);
+return true;
+}
+case TRANSACTION_setCallback:
+{
+data.enforceInterface(DESCRIPTOR);
+com.googlecode.androidcells.LogServiceInterfaceResponse _arg0;
+_arg0 = com.googlecode.androidcells.LogServiceInterfaceResponse.Stub.asInterface(data.readStrongBinder());
+this.setCallback(_arg0);
+reply.writeNoException();
 return true;
 }
 case TRANSACTION_isRecording:
@@ -104,6 +113,30 @@ reply.writeNoException();
 reply.writeInt(_result);
 return true;
 }
+case TRANSACTION_lastCellInfo:
+{
+data.enforceInterface(DESCRIPTOR);
+java.lang.String _result = this.lastCellInfo();
+reply.writeNoException();
+reply.writeString(_result);
+return true;
+}
+case TRANSACTION_getMeasurePlaceLogin:
+{
+data.enforceInterface(DESCRIPTOR);
+java.lang.String _result = this.getMeasurePlaceLogin();
+reply.writeNoException();
+reply.writeString(_result);
+return true;
+}
+case TRANSACTION_getMeasurePlacePassword:
+{
+data.enforceInterface(DESCRIPTOR);
+java.lang.String _result = this.getMeasurePlacePassword();
+reply.writeNoException();
+reply.writeString(_result);
+return true;
+}
 }
 return super.onTransact(code, data, reply, flags);
 }
@@ -121,6 +154,21 @@ return mRemote;
 public java.lang.String getInterfaceDescriptor()
 {
 return DESCRIPTOR;
+}
+public void setCallback(com.googlecode.androidcells.LogServiceInterfaceResponse callback) throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+_data.writeStrongBinder((((callback!=null))?(callback.asBinder()):(null)));
+mRemote.transact(Stub.TRANSACTION_setCallback, _data, _reply, 0);
+_reply.readException();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
 }
 public boolean isRecording() throws android.os.RemoteException
 {
@@ -252,16 +300,72 @@ _data.recycle();
 }
 return _result;
 }
+public java.lang.String lastCellInfo() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+java.lang.String _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_lastCellInfo, _data, _reply, 0);
+_reply.readException();
+_result = _reply.readString();
 }
-static final int TRANSACTION_isRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
-static final int TRANSACTION_startRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
-static final int TRANSACTION_stopRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
-static final int TRANSACTION_getProviderInfos = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
-static final int TRANSACTION_nbGpsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
-static final int TRANSACTION_nbCellLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 5);
-static final int TRANSACTION_nbNeighborsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 6);
-static final int TRANSACTION_nbWifiLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 7);
+finally {
+_reply.recycle();
+_data.recycle();
 }
+return _result;
+}
+public java.lang.String getMeasurePlaceLogin() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+java.lang.String _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_getMeasurePlaceLogin, _data, _reply, 0);
+_reply.readException();
+_result = _reply.readString();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+return _result;
+}
+public java.lang.String getMeasurePlacePassword() throws android.os.RemoteException
+{
+android.os.Parcel _data = android.os.Parcel.obtain();
+android.os.Parcel _reply = android.os.Parcel.obtain();
+java.lang.String _result;
+try {
+_data.writeInterfaceToken(DESCRIPTOR);
+mRemote.transact(Stub.TRANSACTION_getMeasurePlacePassword, _data, _reply, 0);
+_reply.readException();
+_result = _reply.readString();
+}
+finally {
+_reply.recycle();
+_data.recycle();
+}
+return _result;
+}
+}
+static final int TRANSACTION_setCallback = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);
+static final int TRANSACTION_isRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 1);
+static final int TRANSACTION_startRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 2);
+static final int TRANSACTION_stopRecording = (android.os.IBinder.FIRST_CALL_TRANSACTION + 3);
+static final int TRANSACTION_getProviderInfos = (android.os.IBinder.FIRST_CALL_TRANSACTION + 4);
+static final int TRANSACTION_nbGpsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 5);
+static final int TRANSACTION_nbCellLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 6);
+static final int TRANSACTION_nbNeighborsLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 7);
+static final int TRANSACTION_nbWifiLocations = (android.os.IBinder.FIRST_CALL_TRANSACTION + 8);
+static final int TRANSACTION_lastCellInfo = (android.os.IBinder.FIRST_CALL_TRANSACTION + 9);
+static final int TRANSACTION_getMeasurePlaceLogin = (android.os.IBinder.FIRST_CALL_TRANSACTION + 10);
+static final int TRANSACTION_getMeasurePlacePassword = (android.os.IBinder.FIRST_CALL_TRANSACTION + 11);
+}
+public void setCallback(com.googlecode.androidcells.LogServiceInterfaceResponse callback) throws android.os.RemoteException;
 public boolean isRecording() throws android.os.RemoteException;
 public void startRecording() throws android.os.RemoteException;
 public void stopRecording() throws android.os.RemoteException;
@@ -270,4 +374,7 @@ public int nbGpsLocations() throws android.os.RemoteException;
 public int nbCellLocations() throws android.os.RemoteException;
 public int nbNeighborsLocations() throws android.os.RemoteException;
 public int nbWifiLocations() throws android.os.RemoteException;
+public java.lang.String lastCellInfo() throws android.os.RemoteException;
+public java.lang.String getMeasurePlaceLogin() throws android.os.RemoteException;
+public java.lang.String getMeasurePlacePassword() throws android.os.RemoteException;
 }
