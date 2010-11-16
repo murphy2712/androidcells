@@ -1,16 +1,17 @@
 package com.googlecode.androidcells;
 
-import com.googlecode.androidcells.R;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -28,6 +29,8 @@ public class LogService extends Service {
 	private LocationManager mLocationManager;
 	private gpsLocationListener mGpsLocationListener;
 	private DeviceInformation di;
+
+	private WifiReceiver receiverWifi;
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -58,6 +61,7 @@ public class LogService extends Service {
 			// stops the notification icon
 			if (mNotificationManager != null)
 				mNotificationManager.cancel(RECORDING_NOTIFICATION_ID);
+			di.closeZoneFileCellular();
 		}
 		
 		@Override
@@ -84,6 +88,21 @@ public class LogService extends Service {
 		public int nbWifiLocations() throws RemoteException {
 			return di.nbWifiLocations();
 		}
+
+		@Override
+		public String lastCellInfo() throws RemoteException {
+			return di.lastCellInfo();
+		}
+
+		@Override
+		public String getMeasurePlaceLogin() throws RemoteException {
+			return di.prefMeasurePlaceLogin();
+		}
+
+		@Override
+		public String getMeasurePlacePassword() throws RemoteException {
+			return di.prefMeasurePlacePassword();
+		}
 	};
 	
 	public boolean isRecording() {
@@ -109,6 +128,12 @@ public class LogService extends Service {
 					LocationManager.GPS_PROVIDER, 0, 0,
 					mGpsLocationListener);
 		}
+
+		// activate Wifi getScanResults receiver		
+		receiverWifi = new WifiReceiver();
+		registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+
 		// start getting informations
 		di = new DeviceInformation(LogService.this, getBaseContext());
 		// Preparing Notification
@@ -151,7 +176,17 @@ public class LogService extends Service {
 			// TODO Auto-generated method stub
 		}
 	}
-	
+
+	class WifiReceiver extends BroadcastReceiver {
+		public void onReceive(Context c, Intent intent) {
+			di.wifiScanResultReceived = true;
+		}
+	}
+
+
+
+
+
 	@Override
 	public void onDestroy() {
 		Log.v(TAG, "onDestroy()");
@@ -160,6 +195,8 @@ public class LogService extends Service {
 		di.mTelephonyManager.listen(di.signalListener, PhoneStateListener.LISTEN_NONE);
 		// stops the gps listener
 		mLocationManager.removeUpdates(mGpsLocationListener);
+		// unregister wifi getScanResults
+		unregisterReceiver(receiverWifi);
 		// close the db
 		di.closeDB();
 	}

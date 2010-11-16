@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.googlecode.androidcells.R;
+import com.measureplace.utils.FilesUtils;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -43,6 +44,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 	private TextView nbCellLocations_text;
 	private TextView nbNeighborsLocations_text;
 	private TextView nbWifiLocations_text;
+	private TextView lastCellInfo_text;
 	private Button startstop_button;
 	private Button refresh_button;
 	private Intent svc;
@@ -64,7 +66,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			 lsInterface = null;		
+			lsInterface = null;		
 		}
 	};
 	
@@ -96,8 +98,12 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		nbCellLocations_text = (TextView) findViewById(R.id.nbCellLocations_text);
 		nbNeighborsLocations_text = (TextView) findViewById(R.id.nbNeighborsLocations_text);
 		nbWifiLocations_text = (TextView) findViewById(R.id.nbWifiLocations_text);
+		lastCellInfo_text = (TextView) findViewById(R.id.lastCellInfo_text);
 		refresh_button = (Button) findViewById(R.id.refresh_button);
 		refresh_button.setOnClickListener(this);
+
+		FilesUtils.checkFolders();
+
 		svc = new Intent(this, LogService.class);
 
 		// Activate GPS for UI
@@ -215,8 +221,9 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		if (fixSat==0) {
 			accuracy_text.setText("");
 		}
+		updateInfosUI();
 	}
-	
+
 	private synchronized void updateInfosUI() {
 		//long time=SystemClock.uptimeMillis();
 		new updateInfosUITask().execute();
@@ -227,12 +234,13 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		//long time=SystemClock.uptimeMillis();
 		@Override
 		protected String[] doInBackground(Integer... params) {
-			String[] valeurs = {"","","",""};
+			String[] valeurs = {"","","","",""};
 			try {
 				valeurs[0] = ""+lsInterface.nbGpsLocations();
 				valeurs[1] = ""+lsInterface.nbCellLocations();
 				valeurs[2] = ""+lsInterface.nbNeighborsLocations();
 				valeurs[3] = ""+lsInterface.nbWifiLocations();
+				valeurs[4] = ""+lsInterface.lastCellInfo();
 			} catch (Exception e) {}
 			return valeurs;
 		}
@@ -242,6 +250,7 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 			nbCellLocations_text.setText(result[1]);
 			nbNeighborsLocations_text.setText(result[2]);
 			nbWifiLocations_text.setText(result[3]);
+			lastCellInfo_text.setText(result[4]);
 			//Log.v(TAG,"UPDATE_2="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
 		}
 	}
@@ -273,6 +282,9 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 		MenuItem prefsMenuItem = pMenu.add(0, Menu.FIRST, Menu.NONE,
 				R.string.preferences);
 		prefsMenuItem.setIcon(android.R.drawable.ic_menu_preferences);
+		MenuItem prefsMenuItem2 = pMenu.add(0, 2, Menu.NONE,
+				R.string.send);
+		prefsMenuItem2.setIcon(android.R.drawable.ic_menu_send);
 		return true;
 	}
 	
@@ -283,6 +295,11 @@ public class Android_Cells extends Activity implements android.view.View.OnClick
 			Intent intent = new Intent(this,
 					com.googlecode.androidcells.Preferences.class);
 			startActivity(intent);
+			return true;
+		case 2:
+			Intent upload_intent = new Intent(this,
+					com.googlecode.androidcells.UploadActivity.class);
+			startActivity(upload_intent);
 			return true;
 		}
 		return false;

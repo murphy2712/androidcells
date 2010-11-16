@@ -1,8 +1,14 @@
 package com.googlecode.androidcells;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Service;
@@ -23,6 +29,8 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.format.Time;
 import android.util.Log;
+
+import com.measureplace.utils.FilesUtils;
 
 public class DeviceInformation implements Constants {
 
@@ -53,12 +61,44 @@ public class DeviceInformation implements Constants {
 	
 	private SharedPreferences pref;
 
+
+	// <gps time="20100416145550" lng="0.1003742" lat="43.224068" alt="280" hdg="89.52558" spe="17.136" hdop="4.1" vdop="4.66" pdop="6.2" /> 
+	private String gps_start_description_cellular;
+
+
+	private int cellular_automaton = 0;
+	private String cellular_description;
+	private String cellular_mcc;
+	private String cellular_mnc;
+	private int cellular_lac;
+	private int cellular_cid = 0;
+
+	// to be displayed on screen
+	private String cell_info;
+
+	private Gps current_gps_for_cellular;
+	private Date nextScanDate;
+
+	private int wifi_automaton = 0;
+	private String wifi_ap_description;
+	private Gps current_gps_for_wifi;
+	private Gps last_gps_scan_for_wifi;
+	private String gps_start_description_wifi;
+	private String gps_end_description_wifi;
+
+
 	public DeviceInformation(Service logService, Context ctx) {
 		// initialize database
 		acDB = new AndroidCellsDB();
 		//acDB.getNbProviders();
 		pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-		
+
+		// a scan every two seconds
+		Date now = new Date();
+		nextScanDate = new Date(now.getTime() + 1000 * 2);	
+
+		cell_info = "to be defined";
+
 		// register signal listener
 		this.ls = logService;
 		mTelephonyManager = (TelephonyManager) ls.getSystemService(Context.TELEPHONY_SERVICE);
@@ -95,8 +135,177 @@ public class DeviceInformation implements Constants {
 
 		// Register Wifi
 		wm = (WifiManager) ls.getSystemService(Context.WIFI_SERVICE);
+
+
+
 	}
-	
+
+	private FileWriter aFileWriterCellular;
+	private int byteCounterCellular = 0;
+
+	private void openZoneFileCellular(String mcc) {
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date now = new Date();
+			String date = formatter.format(now);
+
+			String manufacturer = Build.MANUFACTURER;
+			String model = Build.MODEL;
+			String revision = Build.VERSION.RELEASE;
+
+			File aFile = new File(FilesUtils.cellularFilesStorage+"V2_"+mcc+"_log"+date+".xml");
+			aFileWriterCellular = new FileWriter(aFile);
+			String xmlTag = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			String logTag = "<logfile manufacturer=\""+manufacturer+"\" model=\""+model+"\" revision=\""+revision+"\" swid=\"AndroidCellsOpenBmap\" swver=\"00.01.00\" >";
+			aFileWriterCellular.write(xmlTag);
+			aFileWriterCellular.write(logTag);
+			aFileWriterCellular.flush();
+
+			byteCounterCellular += xmlTag.length();
+			byteCounterCellular += logTag.length();
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void closeZoneFileCellular() {
+		try {
+			if (aFileWriterCellular!= null) {
+				aFileWriterCellular.write("</logfile>");
+				aFileWriterCellular.flush();
+				aFileWriterCellular.close();
+				byteCounterCellular=0;
+				aFileWriterCellular = null;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void writeZoneFileCellular(String mcc, double dis) {
+		try {
+			if (aFileWriterCellular== null) openZoneFileCellular(mcc);
+
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date now = new Date();
+			String date = formatter.format(now);
+
+			String scanTag = "<scan time=\""+date+"\" distance=\""+dis+"\" >\n";
+			String endScanTag = "</scan>\n";
+
+			int current_scan_length = scanTag.length() + gps_start_description_cellular.length() + cellular_description.length()+ endScanTag.length();
+
+			if ( (byteCounterCellular+current_scan_length) > 20479) {
+				closeZoneFileCellular();
+				openZoneFileCellular(mcc);
+			}else{
+				byteCounterCellular += current_scan_length;
+			}
+
+			//GsmCellLocation mLocation = (GsmCellLocation) mTelephonyManager.getCellLocation();
+			//ArrayList<NeighboringCellInfo> mNeighboringCellInfo = (ArrayList<NeighboringCellInfo>) mTelephonyManager.getNeighboringCellInfo();
+			//updateOpenBmapCell(mLocation);
+			//updateOpenBmapNeighbors(mNeighboringCellInfo);
+
+			aFileWriterCellular.write(scanTag);
+			aFileWriterCellular.write(gps_start_description_cellular);
+			aFileWriterCellular.write(cellular_description);
+			aFileWriterCellular.write(endScanTag);
+			aFileWriterCellular.flush();
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private FileWriter aFileWriterWifi;
+	private int byteCounterWifi = 0;
+
+	private void openZoneFileWifi() {
+		try {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date now = new Date();
+			String date = formatter.format(now);
+
+			String manufacturer = Build.MANUFACTURER;
+			String model = Build.MODEL;
+			String revision = Build.VERSION.RELEASE;
+
+			File aFile = new File(FilesUtils.wifiFilesStorage+"V1_log"+date+".xml");
+			aFileWriterWifi = new FileWriter(aFile);
+			String xmlTag = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			String logTag = "<logfile manufacturer=\""+manufacturer+"\" model=\""+model+"\" revision=\""+revision+"\" swid=\"AndroidCellsOpenBmap\" swver=\"00.01.00\" >";
+			aFileWriterWifi.write(xmlTag);
+			aFileWriterWifi.write(logTag);
+			aFileWriterWifi.flush();
+
+			byteCounterWifi += xmlTag.length();
+			byteCounterWifi += logTag.length();
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void closeZoneFileWifi() {
+		try {
+			if (aFileWriterWifi!= null) {
+				aFileWriterWifi.write("</logfile>");
+				aFileWriterWifi.flush();
+				aFileWriterWifi.close();
+				byteCounterWifi=0;
+				aFileWriterWifi = null;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void writeZoneFileWifi(double dis) {
+		try {
+			if (aFileWriterWifi== null) openZoneFileWifi();
+
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+			Date now = new Date();
+			String date = formatter.format(now);
+
+			String scanTag = "<scan time=\""+date+"\" distance=\""+dis+"\" >\n";
+			String endScanTag = "</scan>\n";
+
+			int current_scan_length = scanTag.length() +
+			gps_start_description_wifi.length() +
+			wifi_ap_description.length()+
+			gps_end_description_wifi.length() +
+			endScanTag.length();
+
+			if ( (byteCounterWifi+current_scan_length) > 20000) {
+				closeZoneFileWifi();
+				openZoneFileWifi();
+			}else{
+				byteCounterWifi += current_scan_length;
+			}
+
+			//GsmCellLocation mLocation = (GsmCellLocation) mTelephonyManager.getCellLocation();
+			//ArrayList<NeighboringCellInfo> mNeighboringCellInfo = (ArrayList<NeighboringCellInfo>) mTelephonyManager.getNeighboringCellInfo();
+			//updateOpenBmapCell(mLocation);
+			//updateOpenBmapNeighbors(mNeighboringCellInfo);
+
+			aFileWriterWifi.write(scanTag);
+			aFileWriterWifi.write(gps_start_description_wifi);
+			aFileWriterWifi.write(wifi_ap_description);
+			aFileWriterWifi.write(gps_end_description_wifi);
+			aFileWriterWifi.write(endScanTag);
+			aFileWriterWifi.flush();
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+
 	private boolean isRecordingCell() {
 		return pref.getBoolean("cell_checkbox", true);
 	}
@@ -117,7 +326,17 @@ public class DeviceInformation implements Constants {
 		return pref.getInt("WifiFilter", 5);
 	}
 
+	public String prefMeasurePlaceLogin() {
+		return pref.getString("MeasurePlace_login","login");
+	}
+
+	public String prefMeasurePlacePassword() {
+		return pref.getString("MeasurePlace_password","password");
+	}
+
 	protected void closeDB() {
+		closeZoneFileCellular();
+		closeZoneFileWifi();
 		acDB.closeDB();
 	}
 	
@@ -132,45 +351,88 @@ public class DeviceInformation implements Constants {
 	// add signals into DataBase
 	public void updateDB(Location currentLoc) {
 		boolean updateGPS = false;
-		// Checks if the GPS info is accurate (< GPS_ACCURACY or GPS_ACCURACY/2 meters)
-		if (currentLoc.getAccuracy() < getGpsAccuracy(prefCellDistanceFilter())) {
-			//Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
-			// Checks if there is not a nearby cell position in DB
-			if (isRecordingCell()
-				&& !acDB.cellLocationNearBD(currentLoc, prefCellDistanceFilter(),
-						mTelephonyManager.getNetworkOperator(), mTelephonyManager.getNetworkType())) {
-				GsmCellLocation mLocation = (GsmCellLocation) mTelephonyManager.getCellLocation();
-				if (isValidCell(mLocation)) {
-					Log.v(TAG, "Recording Cell in DB...");
-					updateGPS = true;
-					long time=SystemClock.uptimeMillis();
-					updateCellDB(currentLoc, mLocation);
-					Log.v(TAG,"FIN Update Cells="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-					updateNeighborsDB(currentLoc);
-					Log.v(TAG,"FIN Update Neighbors="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-				}
-			}
-		} else {
-			Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+
+
+		Gps gps = new Gps();
+		gps.gpsdate = gpsTime2String(currentLoc.getTime());
+		gps.lat = currentLoc.getLatitude();
+		gps.lon = currentLoc.getLongitude();
+		gps.alt = currentLoc.getAltitude();
+		gps.speed = currentLoc.getSpeed();
+		gps.accuracy = currentLoc.getAccuracy();
+		gps.bearing = currentLoc.getBearing();
+		double dis = 0.0;
+		if (current_gps_for_cellular!=null) {
+			dis = gps.distance(current_gps_for_cellular);
 		}
+
+		// record a scan every 2 seconds at most
+		Date now = new Date();
+
+
+		if (isRecordingCell()&&(!now.before(nextScanDate))) {
+			nextScanDate = new Date(now.getTime() + 1000 * 2);	
+			GsmCellLocation mLocation = (GsmCellLocation) mTelephonyManager.getCellLocation();
+			ArrayList<NeighboringCellInfo> mNeighboringCellInfo = (ArrayList<NeighboringCellInfo>) mTelephonyManager.getNeighboringCellInfo();
+
+			// Checks if the GPS info is accurate (< GPS_ACCURACY or GPS_ACCURACY/2 meters)
+			if (currentLoc.getAccuracy() < getGpsAccuracy(prefCellDistanceFilter())) {
+				// record if distance with last point is at least 35 meters
+				// or if the connected cell has changed
+				if ((dis > 35.0 )||(mLocation.getCid() != cellular_cid)) {
+					current_gps_for_cellular = gps;
+					switch(cellular_automaton) {
+					case 0:
+
+						//Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+						// Checks if there is not a nearby cell position in DB
+
+						if (isValidCell(mLocation)) {
+							Log.v(TAG, "Recording Cell in DB...");
+							updateGPS = true;
+							current_gps_for_cellular = gps;
+							gps_start_description_cellular = updateOpenBmapGps(gps);
+							updateOpenBmapCell(mLocation);
+							updateOpenBmapNeighbors(mNeighboringCellInfo);
+							writeZoneFileCellular(mTelephonyManager.getNetworkOperator().substring(0,3), dis);
+						}
+						//cellular_automaton = 1;
+
+						break;
+					case 1:
+						if (isRecordingCell()) {
+							current_gps_for_cellular = gps;
+							gps_start_description_cellular = updateOpenBmapGps(gps);
+							cellular_automaton = 0;
+						}
+						break;
+					}
+				}
+
+			} else {
+				Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefCellDistanceFilter())+"m : "+currentLoc.getAccuracy());
+			}
+		}
+
 		if (currentLoc.getAccuracy() < getGpsAccuracy(prefWifiDistanceFilter())) {
 			//Log.v(TAG,"GPS_ACCURACY<"+getGpsAccuracy(prefWifiDistanceFilter())+"m : "+currentLoc.getAccuracy());
 			if (isRecordingWifi() && wm.isWifiEnabled()) {
 				// Checks if there is not a nearby Wifi position in DB
-				if (!acDB.wifiLocationNearBD(currentLoc, prefWifiDistanceFilter())) {
-					//long time=SystemClock.uptimeMillis();
-					if (updateWifiDB(wm, currentLoc)) {
-						updateGPS = true;
-						//Log.v(TAG,"FIN Update Wifi="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
-					}
+				//if (!acDB.wifiLocationNearBD(currentLoc, prefWifiDistanceFilter())) {
+				if (updateWifiDB(wm, currentLoc)) {
+					//updateGPS = true;
 				}
+				//}
 			}
 		} else {
 			Log.v(TAG,"GPS_ACCURACY>"+getGpsAccuracy(prefWifiDistanceFilter())+"m : "+currentLoc.getAccuracy());
 		}
+
+		/*
 		if (updateGPS) {
 			updateGpsDB(currentLoc);
 		}
+		 */
 		/*
 		if (isValidGps(currentLoc)) {
 			GsmCellLocation mLocation = (GsmCellLocation) mTelephonyManager.getCellLocation();
@@ -223,21 +485,137 @@ public class DeviceInformation implements Constants {
 		acDB.insertGps(gps);
 	}
 
-	// add cell signal
-	private void updateCellDB(Location currentLoc, GsmCellLocation mLocation) {
-		//long time=SystemClock.uptimeMillis();
+	private String updateOpenBmapGps(Gps gps) {
+
+
+		//<gps time="20100416145530" lng="0.0983764" lat="43.2240413" alt="280.9" hdg="88.6563" spe="14.796" hdop="4.09" vdop="4.66" pdop="6.2" /> 
+		String agps_start_description = "<gps"+
+		" time=\""+gps.gpsdate+"\""+
+		" lng=\""+gps.lon+"\""+
+		" lat=\""+gps.lat+"\""+
+		" alt=\""+gps.alt+"\""+
+		" hdg=\""+gps.bearing+"\""+
+		" spe=\""+gps.speed+"\""+
+		//" hdop=\"4.09\""+
+		//" vdop=\"4.66\""+
+		//" pdop=\"6.2\""+
+		" accuracy=\""+gps.accuracy+"\""+
+		" />\n";
+
+		return agps_start_description;
+	}
+
+
+	private void updateOpenBmapCell(GsmCellLocation mLocation) {
 		Cell cell = new Cell();
-		cell.gpsdate = gpsTime2String(currentLoc.getTime());
 		cell.operator_name = mTelephonyManager.getNetworkOperatorName();
 		cell.operator = mTelephonyManager.getNetworkOperator();
+
+		cell.mcc = mTelephonyManager.getNetworkOperator().substring(0,3);
+		cell.mnc = mTelephonyManager.getNetworkOperator().substring(3);
 		cell.type = mTelephonyManager.getNetworkType();
 		cell.cid = mLocation.getCid();
 		cell.lac = mLocation.getLac();
 		//cell.psc = mLocation.Cid();
 		cell.strenght_asu = signalStrengthAsu;
-		//Log.v(TAG,"FIN Update Cells DB1="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
+		cell.signalStrengthdBm = -113 + 2 * signalStrengthAsu;
+
+		String act = getNetworkType(mTelephonyManager.getNetworkType());
+		// v2: <gsmserving mcc="208" mnc="1" lac="12803" id="53762" ss="-73" act="GSM" rxlev="40" /> 
+		cellular_description = "<gsmserving mcc=\""+cell.mcc +"\""+
+		" mnc=\""+cell.mnc+"\""+
+		" lac=\""+cell.lac+"\""+
+		" id=\""+cell.cid+"\""+
+		" ss=\""+cell.signalStrengthdBm+"\""+
+		" act=\""+act+"\""+
+		" rxlev=\""+cell.strenght_asu+"\" />\n"; 
+
+		cellular_mcc = cell.mcc;
+		cellular_mnc = cell.mnc;
+		cellular_lac = cell.lac;
+		cellular_cid = cell.cid;	
+
+		cell_info = act+"/"+cellular_mcc+"/"+cellular_mnc+"/"+cell.lac+"/"+cell.cid+"/"+cell.signalStrengthdBm;
+	}
+
+	private void updateOpenBmapNeighbors(ArrayList<NeighboringCellInfo> mNeighboringCellInfo) {
+		//cellular_description += "mNeighboringCellInfo.size()="+mNeighboringCellInfo.size()+"\n";
+		if (mNeighboringCellInfo.size() != 0) {
+			for (int i = 0; i < mNeighboringCellInfo.size(); ++i) {
+
+				//				cellular_description += "signalStrengthAsu="+NeighboringCellInfo.UNKNOWN_RSSI+"\n";
+				//				cellular_description += "mNeighboringCellInfo.get(i).getLac()="+mNeighboringCellInfo.get(i).getLac()+"\n";
+
+				// checks if cell info is valid
+				if ((signalStrengthAsu != NeighboringCellInfo.UNKNOWN_RSSI)
+
+
+						//		&& mNeighboringCellInfo.get(i).getLac() != 0
+						//		&& mNeighboringCellInfo.get(i).getLac() != -1
+						//		&& mNeighboringCellInfo.get(i).getCid() != 0
+						//		&& mNeighboringCellInfo.get(i).getCid() != -1
+				) {
+					//	if (mNeighboringCellInfo.get(i).getLac() != 0) {
+
+
+					Neighbor n = new Neighbor();
+					n.type = mNeighboringCellInfo.get(i).getNetworkType();
+					n.cid = mNeighboringCellInfo.get(i).getCid();
+					n.lac = mNeighboringCellInfo.get(i).getLac();
+					n.psc = mNeighboringCellInfo.get(i).getPsc();
+					n.strenght_asu = mNeighboringCellInfo.get(i).getRssi();
+
+					// v2:<gsmneighbour mcc="208" mnc="1" lac="12803" id="2903" rxlev="27" c1="28" c2="28" /> 
+					cellular_description += "<gsmneighbour"+
+					" mcc=\""+cellular_mcc+"\""+
+					" mnc=\""+cellular_mnc+"\""+
+					" lac=\""+n.lac+"\""+
+					" id=\""+n.cid+"\""+
+					" psc=\""+n.psc+"\""+
+					" rxlev=\""+n.strenght_asu+"\""+
+					//" c1=\""+n.c1+""+
+					//" c2=\""+n.c2+"\""+
+					" act=\""+getNetworkType(n.type)+"\""+
+					" />\n";
+				}
+			}
+		}
+	}
+
+
+
+
+	// add cell signal
+	private void updateCellDB(Location currentLoc, GsmCellLocation mLocation) {
+		Cell cell = new Cell();
+		cell.gpsdate = gpsTime2String(currentLoc.getTime());
+		cell.operator_name = mTelephonyManager.getNetworkOperatorName();
+		cell.operator = mTelephonyManager.getNetworkOperator();
+
+		cell.mcc = mTelephonyManager.getNetworkOperator().substring(0,3);
+		cell.mnc = mTelephonyManager.getNetworkOperator().substring(3);
+
+		cell.type = mTelephonyManager.getNetworkType();
+		cell.cid = mLocation.getCid();
+		cell.lac = mLocation.getLac();
+		//cell.psc = mLocation.Cid();
+		cell.strenght_asu = signalStrengthAsu;
+		cell.signalStrengthdBm = -113 + 2 * signalStrengthAsu;
+
 		acDB.insertCell(cell);
-		//Log.v(TAG,"FIN Update Cells DB2="+ (float)(SystemClock.uptimeMillis()-time)/1000 );
+
+		// v2: <gsmserving mcc="208" mnc="1" lac="12803" id="53762" ss="-73" act="GSM" rxlev="40" /> 
+		cellular_description = "<gsmserving mcc=\""+cell.operator_name +"\""+
+		" mnc=\""+cell.operator+"\""+
+		" lac=\""+cell.lac+"\""+
+		" id=\""+cell.cid+"\""+
+		" ss=\""+cell.signalStrengthdBm+"\""+
+		" act=\""+mTelephonyManager.getNetworkType()+"\""+
+		" rxlev=\""+cell.strenght_asu+"\" />\n"; 
+
+		cellular_mcc = cell.mcc;
+		cellular_mnc = cell.mnc;
+
 	}
 
 	// add neighbors signals
@@ -251,45 +629,153 @@ public class DeviceInformation implements Constants {
 				// checks if cell info is valid
 				if ((signalStrengthAsu != NeighboringCellInfo.UNKNOWN_RSSI)
 						&& mNeighboringCellInfo.get(i).getLac() != 0) {
+					Neighbor n = new Neighbor();
+					n.gpsdate = gpsTime2String(currentLoc.getTime());
+					n.type = mNeighboringCellInfo.get(i).getNetworkType();
+					n.cid = mNeighboringCellInfo.get(i).getCid();
+					n.lac = mNeighboringCellInfo.get(i).getLac();
+					n.psc = mNeighboringCellInfo.get(i).getPsc();
+					n.strenght_asu = mNeighboringCellInfo.get(i).getRssi();
 					acDB.insertNeighbor(gpsTime2String(currentLoc.getTime()),
-										mNeighboringCellInfo.get(i).getNetworkType(),
-										mNeighboringCellInfo.get(i).getCid(),
-										mNeighboringCellInfo.get(i).getLac(),
-										mNeighboringCellInfo.get(i).getPsc(),
-										mNeighboringCellInfo.get(i).getRssi());
+							mNeighboringCellInfo.get(i).getNetworkType(),
+							mNeighboringCellInfo.get(i).getCid(),
+							mNeighboringCellInfo.get(i).getLac(),
+							mNeighboringCellInfo.get(i).getPsc(),
+							mNeighboringCellInfo.get(i).getRssi());
+
+
+					// v2:<gsmneighbour mcc="208" mnc="1" lac="12803" id="2903" rxlev="27" c1="28" c2="28" /> 
+					cellular_description += "<gsmneighbour"+
+					" mcc=\""+cellular_mcc+"\""+
+					" mnc=\""+cellular_mnc+"\""+
+					" lac=\""+n.lac+"\""+
+					" id=\""+n.cid+"\""+
+					" psc=\""+n.psc+"\""+
+					" rxlev=\""+n.strenght_asu+"\""+
+					//" c1=\""+n.c1+""+
+					//" c2=\""+n.c2+"\""+
+					" act=\""+n.type+"\""+
+					" />\n";
+
+
 				}
 			}
 		}
 	}
-	
+
+
+
+
+	private static boolean wifiScanRequested = false;
+	public static boolean wifiScanResultReceived = false ;
+
 	public boolean updateWifiDB(WifiManager wm, Location currentLoc){
 		boolean updateWifi = false;
+
+
+		Gps gps = new Gps();
+		gps.gpsdate = gpsTime2String(currentLoc.getTime());
+		gps.lat = currentLoc.getLatitude();
+		gps.lon = currentLoc.getLongitude();
+		gps.alt = currentLoc.getAltitude();
+		gps.speed = currentLoc.getSpeed();
+		gps.accuracy = currentLoc.getAccuracy();
+		gps.bearing = currentLoc.getBearing();
+		double dis = 0.0;
+		double lastSuccessfulScanDis = 0.0;
+		boolean lastSuccessfulScanTooClose = false;
+
 		if (wm.isWifiEnabled()) {
-			wm.startScan();
-			List<ScanResult> scanlist = wm.getScanResults();
-			if (scanlist!=null) {
-				int idx=0;
-				while(scanlist.size() > idx) {
-					updateWifi = true;
-					Wifi w = new Wifi();
-					w.gpsdate = gpsTime2String(currentLoc.getTime());
-					w.BSSID = scanlist.get(idx).BSSID;
-					w.SSID = scanlist.get(idx).SSID;
-					w.capabilities = scanlist.get(idx).capabilities;
-					w.frequency = scanlist.get(idx).frequency;
-					w.level= scanlist.get(idx).level;
-					acDB.insertWifi(w);
-					idx++;
-					//Log.v(TAG, "Wifi: "+w.BSSID+"/"+w.SSID+"/"+w.capabilities+"/"+w.frequency+"/"+w.level);
-				} 
-				scanlist.iterator();
-			} else {
-				Log.v(TAG, "No Wifi signal in scan");
+
+			if (!wifiScanRequested) {
+
+				if (last_gps_scan_for_wifi!=null) {
+					lastSuccessfulScanDis = gps.distance(last_gps_scan_for_wifi);
+					if (lastSuccessfulScanDis < 35.0) lastSuccessfulScanTooClose = true;
+				}
+
+				if (!lastSuccessfulScanTooClose) {
+					wifi_ap_description = "";
+					if (wm.startScan()) {	
+						// write GPS
+						wifi_ap_description = "";
+						gps_end_description_wifi = "";
+						current_gps_for_wifi = gps;
+						gps_start_description_wifi = updateOpenBmapGps(gps);
+						wifiScanRequested = true;
+					}else{
+						Log.v(TAG, "Impossible to start a wifi scan");
+					}
+				}else{
+					Log.v(TAG, "Last succesful wifi scan to close");
+				}
+			}else{
+				if (wifiScanResultReceived){
+					dis = gps.distance(current_gps_for_wifi);
+
+					if (dis < 35.0) {
+						gps_end_description_wifi = updateOpenBmapGps(gps);
+
+						List<ScanResult> scanlist = wm.getScanResults();
+						if (scanlist!=null) {
+							int idx=0;
+							while(scanlist.size() > idx) {
+								updateWifi = true;
+								Wifi w = new Wifi();
+								w.gpsdate = gpsTime2String(currentLoc.getTime());
+								w.BSSID = scanlist.get(idx).BSSID;
+								w.SSID = scanlist.get(idx).SSID;
+								w.capabilities = scanlist.get(idx).capabilities;
+								w.frequency = scanlist.get(idx).frequency;
+								w.level= scanlist.get(idx).level;
+								//acDB.insertWifi(w);
+								idx++;
+
+								//  <wifiap bssid="000B6B4F82BF" md5essid="245e48daf53033d2974674766566f4b1" ntiu="OFDM24" enc="1" ss="-85" im="1" /> 
+								wifi_ap_description +=  "<wifiap bssid=\""+w.BSSID.replaceAll(":", "")+"\" md5essid=\"" + md5(w.SSID) + "\" ";
+								if (w.capabilities!=null) wifi_ap_description += "capa=\"" + w.capabilities + "\" ";
+								wifi_ap_description += "ss=\""+w.level + "\" ntiu=\""+w.frequency+"\" />\n";
+							} 
+							// write in file
+							writeZoneFileWifi(dis);
+							last_gps_scan_for_wifi = gps;
+						} else {
+							Log.v(TAG, "No Wifi signal in scan");
+						}
+						wifiScanRequested = false;
+						wifiScanResultReceived = false;
+
+					}else{
+						Log.v(TAG, "Moving too fast");
+					}
+				}else{
+					Log.v(TAG, "No Wifi scan received yet");
+				}
 			}
 		}
 		return updateWifi;
 	}
-	
+
+	public String md5(String s) {  
+		try {  
+			// Create MD5 Hash  
+			MessageDigest digest = java.security.MessageDigest.getInstance("MD5");  
+			digest.update(s.getBytes());  
+			byte messageDigest[] = digest.digest();  
+
+			// Create Hex String  
+			StringBuffer hexString = new StringBuffer();  
+			for (int i=0; i<messageDigest.length; i++)  
+				hexString.append(Integer.toHexString(0xFF & messageDigest[i]));  
+			return hexString.toString();  
+
+		} catch (NoSuchAlgorithmException e) {  
+			e.printStackTrace();  
+		}  
+		return "";  
+	}  
+
+
 	public int nbGpsLocations() {
 		return acDB.nbGpsLocations();
 	}
@@ -305,7 +791,12 @@ public class DeviceInformation implements Constants {
 	public int nbWifiLocations() {
 		return acDB.nbWifiLocations();
 	}
-	
+
+	public String lastCellInfo() {
+		return cell_info;
+	}
+
+
 	public String getStringInfos(Location currentLocation) {
 		String Build = getBuildInfos();
 		String Provider = getProviderInfos();
@@ -549,5 +1040,37 @@ public class DeviceInformation implements Constants {
 		}
 		return result;
 	}
+
+
+	private String getNetworkType(int atype) {
+		switch(atype) {
+		case TelephonyManager.NETWORK_TYPE_UNKNOWN :
+			return "NA";
+		case TelephonyManager.NETWORK_TYPE_GPRS:
+			return "GSM";
+		case TelephonyManager.NETWORK_TYPE_EDGE:
+			return "EDGE";
+		case TelephonyManager.NETWORK_TYPE_UMTS:
+			return "UMTS";
+		case TelephonyManager.NETWORK_TYPE_CDMA:
+			return "CDMA";
+		case TelephonyManager.NETWORK_TYPE_EVDO_0:
+			return "EDV0_0";
+		case TelephonyManager.NETWORK_TYPE_EVDO_A:
+			return "EDV0_A";
+		case TelephonyManager.NETWORK_TYPE_1xRTT:
+			return "1xRTT";
+		case TelephonyManager.NETWORK_TYPE_HSDPA:
+			return "HSDPA";
+		case TelephonyManager.NETWORK_TYPE_HSUPA:
+			return "HSUPA";
+		case TelephonyManager.NETWORK_TYPE_HSPA:
+			return "HSPA";
+		}
+		return "NA";
+
+	}
+
+
 
 }

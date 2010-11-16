@@ -46,4 +46,15 @@
 			android:defaultValue="5"
 			android:dialogTitle="@string/Wifi_Title_Box" />
 	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/MeasurePlace_Parameter">
+		<EditTextPreference android:title="@string/Login" android:key="MeasurePlace_login"
+			android:summary="@string/MeasurePlace_login_Activated"
+			android:dialogTitle="Enter MeasurePlace login"
+			android:defaultValue="admin"/>
+		<EditTextPreference android:title="@string/Password" android:key="MeasurePlace_password"
+			android:summary="Mot de passe"
+			android:password="true"
+			android:dialogTitle="Enter MeasurePlace password"
+			android:defaultValue="admin"/>
+	</PreferenceCategory>
 </PreferenceScreen>

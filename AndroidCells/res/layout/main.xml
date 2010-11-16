@@ -112,7 +112,23 @@
     		android:text=""
     	/>
     </LinearLayout>
-	<Button android:text="@string/start"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:orientation="horizontal"
+    		android:layout_width="fill_parent"
+    		android:layout_height="fill_parent" >
+   		<TextView
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text="@string/lastCellInfo"
+    	/>
+    	<TextView
+	    	android:id="@+id/lastCellInfo_text"  
+    		android:layout_width="wrap_content"
+    		android:layout_height="fill_parent"
+    		android:text=""
+    	/>
+    </LinearLayout>
+    <Button android:text="@string/start"
 			android:id="@+id/start_stop_button"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content">

@@ -12,4 +12,7 @@ interface LogServiceInterface {
 	int nbCellLocations();
 	int nbNeighborsLocations();
 	int nbWifiLocations();
+	String lastCellInfo();
+	String getMeasurePlaceLogin();
+	String getMeasurePlacePassword();
 }

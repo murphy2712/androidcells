@@ -1,30 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="app_name">Android Cells</string><string name="gps_state">&quot;État du GPS : &quot;</string>
-<string name="satellites">Satellites</string><string name="recording_state">&quot;État de l'enregistrement : &quot;</string><string name="start">Démarrer</string>
-<string name="stop">Arrêter</string>
-<string name="activated">Activé</string>
-<string name="stopped">Arrêté</string><string name="disabled">Désactivé</string>
-<string name="recording">En cours...</string>
+	<string name="app_name">Android Cells</string>
+	<string name="gps_state">&quot;État du GPS : &quot;</string>
+	<string name="satellites">Satellites</string>
+	<string name="recording_state">&quot;État de l'enregistrement : &quot;</string>
+	<string name="start">Démarrer</string>
+	<string name="stop">Arrêter</string>
+	<string name="activated">Activé</string>
+	<string name="stopped">Arrêté</string>
+	<string name="disabled">Désactivé</string>
+	<string name="recording">En cours...</string>
+
+	<string name="recording_signals">Enregistrement des signaux...</string>
+
+	<string name="send">Alimenter openBmap</string>
+	<string name="nbCellularFilesToSend">&quot;Nb de fichiers cellulaire : &quot;</string>
+	<string name="nbWifiFilesToSend">&quot;Nb de fichiers wifi : &quot;</string>
+	<string name="noFileToUpload">aucun</string>
+
+	<string name="uploading_signals">Envoi des fichiers...</string>
 
 
-
-<string name="recording_signals">Enregistrement des signaux...</string>
-
-
-
-<string name="refresh">Rafraichir</string>
-<string name="nbGpsLocations">&quot;Nb Gps Locations : &quot;</string><string name="nbCellLocations">&quot;Nb Cell Locations : &quot;</string><string name="nbNeighborsLocations">&quot;Nb Neighbors Locations : &quot;</string><string name="nbWifiLocations">&quot;Nb Wifi Locations : &quot;</string>
-<string name="preferences">Préférences</string>
-<string name="GPS_Parameter">Paramètres du GPS</string><string name="Cell_Parameter">Paramètres des Antennes Cellulaires</string><string name="Wifi_Parameter">Paramètres du Wifi</string><string name="GPS_Accuracy">Précision max. du GPS</string><string name="GPS_Accuracy_Summary">Distance en mètres</string><string name="GPS_Title_Box">Recherche des nouveaux signaux GPS</string>
-
-<string name="Cell_Filter">Filtre pour les Antennes Cellulaires</string><string name="Cell_Filter_Summary">Distance minimum de recherche des nouveaux signaux Cellulaires</string><string name="Cell_Title_Box">Recherche des nouveaux signaux Cellulaires</string><string name="Wifi_Filter">Filtre pour le Wifi</string>
-
-<string name="Wifi_Filter_Summary">Distance minimum de recherche des nouveaux signaux Wifi</string>
-<string name="Wifi_Title_Box">Recherche des nouveaux signaux Wifi</string>
-<string name="Distance_Summary">Choisissez la distance en mètres</string>
-<string name="meters_abbreviation">m</string>
-<string name="Activate_Cell">Enregistrement Cellulaire</string><string name="Activate_Cell_Activated">Enregistrement des Cellules Activé</string><string name="Activate_Cell_Disabled">Enregistrement des Cellules Désactivé</string><string name="Activate_Wifi">Enregistrement Wifi</string><string name="Activate_Wifi_Activated">Enregistrement des signaux Wifi Activé</string><string name="Activate_Wifi_Disabled">Enregistrement des signaux Wifi Désactivé</string>
-
+	<string name="refresh">Rafraichir</string>
+	<string name="nbGpsLocations">&quot;Nb Gps Locations : &quot;</string>
+	<string name="nbCellLocations">&quot;Nb Cell Locations : &quot;</string>
+	<string name="nbNeighborsLocations">&quot;Nb Neighbors Locations : &quot;</string>
+	<string name="nbWifiLocations">&quot;Nb Wifi Locations : &quot;</string>
+	<string name="lastCellInfo">&quot;Last Cell Info : &quot;</string>
+	
+	<string name="preferences">Préférences</string>
+	<string name="GPS_Parameter">Paramètres du GPS</string>
+	<string name="Cell_Parameter">Paramètres des Antennes Cellulaires</string>
+	<string name="Wifi_Parameter">Paramètres du Wifi</string>
+	<string name="GPS_Accuracy">Précision max. du GPS</string>
+	<string name="GPS_Accuracy_Summary">Distance en mètres</string>
+	<string name="GPS_Title_Box">Recherche des nouveaux signaux GPS</string>
+	<string name="Cell_Filter">Filtre pour les Antennes Cellulaires</string>
+	<string name="Cell_Filter_Summary">Distance minimum de recherche des nouveaux signaux Cellulaires</string>
+	<string name="Cell_Title_Box">Recherche des nouveaux signaux Cellulaires</string>
+	<string name="Wifi_Filter">Filtre pour le Wifi</string>
+	<string name="Wifi_Filter_Summary">Distance minimum de recherche des nouveaux signaux Wifi</string>
+	<string name="Wifi_Title_Box">Recherche des nouveaux signaux Wifi</string>
+	<string name="Distance_Summary">Choisissez la distance en mètres</string>
+	<string name="meters_abbreviation">m</string>
+	<string name="Activate_Cell">Enregistrement Cellulaire</string>
+	<string name="Activate_Cell_Activated">Enregistrement des Cellules Activé</string>
+	<string name="Activate_Cell_Disabled">Enregistrement des Cellules Désactivé</string>
+	<string name="Activate_Wifi">Enregistrement Wifi</string>
+	<string name="Activate_Wifi_Activated">Enregistrement des signaux Wifi Activé</string>
+	<string name="Activate_Wifi_Disabled">Enregistrement des signaux Wifi Désactivé</string>
+	<string name="MeasurePlace_Parameter">Compte MeasurePlace</string>
+	<string name="Login">Login</string>
+	<string name="MeasurePlace_login_Activated">Login</string>
+	<string name="MeasurePlace_login_Disabled">Login</string>
+	<string name="Password">Mot de passe</string>
+	<string name="MeasurePlace_password_Activated">Mot de passe</string>
+	<string name="MeasurePlace_password_Disabled">Mot de passe</string>
 </resources>

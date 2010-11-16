@@ -12,7 +12,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".Preferences" />
+        <activity android:name=".UploadActivity" />
         <service android:name=".LogService" />
+        <service android:exported="true" android:name=".openBmapUploadService" />
     </application>
     <uses-sdk android:minSdkVersion="3" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
@@ -22,4 +24,5 @@
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 
